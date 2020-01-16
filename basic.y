@@ -16,13 +16,10 @@ Node* top;
 %token DEFINE ARRAY WHILE IF ELSE SEMIC PLUS TIMES MINUS DEVIDE ASSIGN EQUAL LT RT REM LPAR RPAR L_BRACKET R_BRACKET L_BRACE R_BRACE
 %token <sp> IDENT
 %token <ival> NUMBER
-%type <np> main_program program declarations statements decl_statement array_stmt statement loop_stmt cond_stmt assignment_stmt expression term factor var condition 
+%type <np> program declarations statements decl_statement array_stmt statement loop_stmt cond_stmt assignment_stmt expression term factor var condition 
 %%
-main_program : program main_program {top = build_node2(MAIN_AST,$1,$2);}
-| program {top = build_node(MAIN_AST,$1);}
-; 
 
-program : declarations statements {$$ = build_node2(PROGRAM_AST,$1,$2);}
+program : declarations statements {top = build_node2(PROGRAM_AST,$1,$2);}
 ;
 
 declarations : decl_statement declarations {$$ = build_node2(DCLRS_AST,$1,$2);}
@@ -33,7 +30,7 @@ decl_statement : DEFINE IDENT SEMIC {$$ = build_ident_node(DCLR_AST,$2);}
 | ARRAY array_stmt SEMIC {$$ = build_node(DCLR_AST,$2);}
 ; 
 
-array_stmt : IDENT L_BRACKET expression R_BRACKET {$$ = build_array_node(ARRAY_AST,$1,$3);}
+ array_stmt : IDENT L_BRACKET expression R_BRACKET {$$ = build_array_node(ARRAY_AST,$1,$3);}
 ;
 
 statements : statement statements {$$ = build_node2(STMTS_AST,$1,$2);}
@@ -45,7 +42,7 @@ statement : assignment_stmt SEMIC {$$ = build_node(STMT_AST,$1);}
 | cond_stmt {$$ = build_node(STMT_AST,$1);}
 ;
 
-assignment_stmt : IDENT ASSIGN expression {$$ = build_node2(ASSIGN_AST,$1,$3);} 
+assignment_stmt : IDENT ASSIGN expression {$$ = build_assign_node(ASSIGN_AST,$1,$3);} 
 | array_stmt ASSIGN expression {$$ = build_node2(ASSIGN_AST,$1,$3);}
 ;
 
@@ -103,5 +100,6 @@ int main(void){
         fprintf(stderr, "Error\n");
         return 1;
     }
+    printNodes(top);
     return 0;
 }

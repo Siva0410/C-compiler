@@ -1,4 +1,5 @@
 %{
+#include "ast.h"
 #include "basic.tab.h"
 #include <math.h>
 %}
@@ -28,7 +29,7 @@
 "{"            { return L_BRACE; } 
 "}"            { return R_BRACE; }
 
-[0-9]+         { return NUMBER; }
-[a-zA-Z][0-9a-zA-Z]*     { return IDENT; }
+[0-9]+         { yylval.ival = atoi(yytext); return NUMBER; }
+[a-zA-Z][0-9a-zA-Z]*     { yylval.sp = strdup(yytext); return IDENT; }
 [\t ] ; /* ignore whitespace */
 %%

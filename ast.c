@@ -27,6 +27,19 @@ Node* build_node2(NType t, Node* p1, Node* p2){
     return p;
 }
 
+
+Node* build_assign_node(NType t, char* str, Node* p2){
+    Node *p;
+    if((p = (Node *)malloc(sizeof(Node))) == NULL){
+        // yyerror("out of memory");
+    }
+    p->type = t;
+    p->child = p2;
+    p->brother = NULL;
+    return p;
+}
+
+
 Node* build_node3(NType t, Node* p1, Node* p2, Node* p3){
     Node *p;
     if((p = (Node *)malloc(sizeof(Node))) == NULL){
@@ -55,7 +68,7 @@ Node* build_num_node(NType t, int n){
 Node* build_ident_node(NType t, char* str){
     Node *p;
     if((p = (Node *)malloc(sizeof(Node))) == NULL){
-        //yyerror("out of memory");
+        yyerror("out of memory");
     }
     p->type = t;
     p->variable = (char*)malloc(sizeof(char)*strlen(str));
@@ -65,10 +78,10 @@ Node* build_ident_node(NType t, char* str){
     return p;
 }
 
-Node* build_array_node(NType t, char* str, int num){
+Node* build_array_node(NType t, char* str, Node* p1){
     Node *p;
     if((p = (Node *)malloc(sizeof(Node))) == NULL){
-        //yyerror("out of memory");
+        yyerror("out of memory");
     }
     p->type = t;
     p->variable = (char*)malloc(sizeof(char)*strlen(str));

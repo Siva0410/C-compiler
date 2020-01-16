@@ -1,5 +1,4 @@
 typedef enum {
-    MAIN_AST, //メインのノード型
     PROGRAM_AST, //プログラムのノード型
     DCLRS_AST, //宣言の集合のノード型
     DCLR_AST, //宣言のノード型
@@ -45,6 +44,7 @@ typedef struct array{
 Node* build_node(NType t, Node* p1);
 Node* build_node2(NType t, Node* p1, Node* p2);
 Node* build_node3(NType t, Node* p1, Node* p2, Node* p3);
+Node* build_assign_node(NType t, char* str, Node* p1);
 Node* build_num_node(NType t, int n);
 Node* build_ident_node(NType t, char* str);
-Node* build_array_node(NType t, char* str, int num);
+Node* build_array_node(NType t, char* str, Node* p1);
