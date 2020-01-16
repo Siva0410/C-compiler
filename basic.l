@@ -1,7 +1,6 @@
 %{
 #include "basic.tab.h"
 #include <math.h>
-extern double vbltable[26];
 %}
 
 %%

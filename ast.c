@@ -65,6 +65,19 @@ Node* build_ident_node(NType t, char* str){
     return p;
 }
 
+Node* build_array_node(NType t, char* str, int num){
+    Node *p;
+    if((p = (Node *)malloc(sizeof(Node))) == NULL){
+        //yyerror("out of memory");
+    }
+    p->type = t;
+    p->variable = (char*)malloc(sizeof(char)*strlen(str));
+    strcpy(p->variable, str);
+    p->child = NULL;
+    p->brother = NULL;
+    return p;
+}
+
 
 /* Node の表示*/
 void printNodes(Node *obj){
@@ -84,6 +97,7 @@ void printNodes(Node *obj){
 
 }
 
+/*
 int main(int argc, char *argv[]){
     Node *n1,*n2,*n3,*n4,*n5,*n6;
     n1=build_ident_node(IDENT_AST,"xx");
@@ -98,3 +112,4 @@ int main(int argc, char *argv[]){
 
   return 0;
 }
+*/

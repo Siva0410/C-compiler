@@ -66,14 +66,27 @@ extern int yydebug;
     R_BRACKET = 276,
     L_BRACE = 277,
     R_BRACE = 278,
-    NUMBER = 279,
-    IDENT = 280
+    IDENT = 279,
+    NUMBER = 280
   };
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+
+union YYSTYPE
+{
+#line 10 "basic.y" /* yacc.c:1909  */
+
+    Node* np;  //抽象構文木
+    int ival; //変数
+    char* sp;
+ 
+
+#line 87 "basic.tab.h" /* yacc.c:1909  */
+};
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
