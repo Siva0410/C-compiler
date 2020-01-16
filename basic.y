@@ -99,7 +99,8 @@ int main(void){
     if(yyparse()){
         fprintf(stderr, "Error\n");
         return 1;
-    }
+ }else{
     printNodes(top);
+ }
     return 0;
 }
