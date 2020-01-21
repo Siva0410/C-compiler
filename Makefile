@@ -4,10 +4,10 @@ YACC = bison -d
 HDRS = basic.tab.h 
 LDFLAGS = -lfl -ly 
 LIBS = 
-OBJS = basic.tab.o lex.yy.o ast.o 
+OBJS =  basic.tab.o lex.yy.o ast.o 
 PROGRAM = basic.out
-all: $(PROGRAM) 
-$(PROGRAM):	$(OBJS) $(HDRS) 
+all: $(PROGRAM)
+$(PROGRAM): lex.yy.c basic.tab.c $(OBJS) $(HDRS)
 	$(CC) $(OBJS) $(LDFLAGS) $(LIBS) -o $(PROGRAM) 
 lex.yy.c:  basic.l 
 	$(LEX) basic.l 
