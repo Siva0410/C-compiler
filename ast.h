@@ -41,6 +41,19 @@ typedef struct array{
     struct array* next; //次の変数へのリンク
 } Array;
 
+#define SIMNAMELEN 64
+#define MAXSIMENTRIES 100
+
+struct simTableEntry {
+    char name[SIMNAMELEN];
+    SType type;
+    SScope scope;
+    SSize size;
+    SValue value;
+} SimTableEntry;
+
+SimTableEntry simTable[MAXSIMENTRIES];
+
 Node* build_node(NType t, Node* p1);
 Node* build_node2(NType t, Node* p1, Node* p2);
 Node* build_node3(NType t, Node* p1, Node* p2, Node* p3);
