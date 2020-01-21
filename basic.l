@@ -10,6 +10,7 @@
 "while"        { return WHILE; }
 "if"           { return IF; }
 "else"         { return ELSE; }
+"return"     { break;}
 ";"            { return SEMIC; }
 
 "+"            { return PLUS; }

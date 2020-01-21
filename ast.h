@@ -48,4 +48,4 @@ Node* build_assign_node(NType t, char* str, Node* p1);
 Node* build_num_node(NType t, int n);
 Node* build_ident_node(NType t, char* str);
 Node* build_array_node(NType t, char* str, Node* p1);
-void printNodes(Node *obj);
+void printTree(Node *obj);

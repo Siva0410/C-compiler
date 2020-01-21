@@ -1690,12 +1690,16 @@ yyreturn:
 }
 #line 97 "basic.y" /* yacc.c:1906  */
  
+
+
+
 int main(void){
-    if(yyparse()){
-        fprintf(stderr, "Error\n");
-        return 1;
- }else{
-    printNodes(top);
- }
+    int result;
+    Node *parse_result = NULL;
+    result =yyparse();
+    parse_result = top;
+    if(!result){
+        printTree(parse_result);
+    }
     return 0;
 }

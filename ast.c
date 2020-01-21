@@ -91,38 +91,109 @@ Node* build_array_node(NType t, char* str, Node* p1){
     return p;
 }
 
+void printTree(Node* p)
+{
+    // printf("(");
+    if (p != NULL) {
+        
+        switch(p->type){
+        case PROGRAM_AST:
+            printf("program: ");
+            break;
+        case DCLRS_AST:
+            printf("declarations: ");
+            break;
+        case DCLR_AST:
+            printf("declaration: ");
+            break;    
+            /*case DeclStmt_AST:
+            printf("decl_statement: ");
+            break;*/
+        case ARRAY_AST:
+            printf("array: ");
+            break;    
+        case STMTS_AST:
+            printf("statements: ");
+            break;  
+        case STMT_AST:
+            printf("statement: ");
+            break;
+        case ASSIGN_AST:
+            printf("assigment_stmt: ");
+            break;    
+        case EXPRESS_AST:
+            printf("expression: ");
+            break; 
+        case PLUS_AST:
+            printf("add: ");
+            break;
+        case MINUS_AST:
+            printf("sub: ");
+            break;    
+            /*case REM_AST:
+            printf("rem: ");
+            break;*/
+        case TIMES_AST:
+            printf("mul: ");
+            break;
+        case DEVIDE_AST:
+            printf("div: ");
+            break;    
+        case TERM_AST:
+            printf("term: ");
+            break; 
+        case FACTOR_AST:
+            printf("factor: ");
+            break;
+        case IDENT_AST:
+            printf("ident: ");
+            break;    
+        case NUM_AST:
+            printf("number: ");
+            break;
+            /*case Var_AST:
+            printf("var: ");
+            break;*/
+        case WHILE_AST:
+            printf("loop_stmt: ");
+            break;    
+        case IF_AST:
+            printf("cond_stmt: ");
+            break; 
+        case EQUAL_AST:
+            printf("EQ: ");
+            break;
+        case LT_AST:
+            printf("LT: ");
+            break;    
+        case RT_AST:
+            printf("RT: ");
+            break;    
+        default:
+            break;
+        }
 
-/* Node の表示*/
-void printNodes(Node *obj){
-  if (obj != NULL) {
-    if (obj->child != NULL) {
-      printNodes(obj->child);
+        if(p->variable != NULL){
+            printf("%s\t", p->variable);
+        }else{
+            printf("NO IDENT\t");
+        }
+        
+        printf("%d\t",p->value);
+        
+        
+        /* if (p->brother != NULL) { */
+        /*     printTree(p->brother);             */
+        /* } */
+        if (p->child != NULL) {
+            printf("(");
+            printTree(p->child);
+            printf(")");       
+        }         
+         if (p->brother != NULL) {
+            printTree(p->brother);            
+        }
     }
-
-    printf("%d\t", obj->value);
-    if(obj->value == 0)
-    printf("%s\t", obj->variable);
-
-    if (obj->brother != NULL) {
-      printNodes(obj->brother);
-    }
-  }
 
 }
 
-/*
-int main(int argc, char *argv[]){
-    Node *n1,*n2,*n3,*n4,*n5,*n6;
-    n1=build_ident_node(IDENT_AST,"xx");
-    n2=build_num_node(NUM_AST,2);
-    n3=build_num_node(NUM_AST,3);
-    n4=build_num_node(NUM_AST,4);
-    n5=build_node3(NUM_AST,n1,n2,n3);
-    n6=build_node2(NUM_AST,n5,n4);
-    
-    printNodes(n6);
-    printf("\n");
-
-  return 0;
-}
-*/
