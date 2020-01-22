@@ -44,12 +44,12 @@ typedef struct array{
 #define SIMNAMELEN 64
 #define MAXSIMENTRIES 100
 
-struct simTableEntry {
+typedef struct simTableEntry {
     char name[SIMNAMELEN];
-    SType type;
-    SScope scope;
-    SSize size;
-    SValue value;
+    //SType type;
+    //SScope scope;
+    //SSize size;
+    //SValue value;
 } SimTableEntry;
 
 SimTableEntry simTable[MAXSIMENTRIES];

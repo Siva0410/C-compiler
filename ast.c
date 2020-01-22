@@ -72,7 +72,7 @@ Node* build_ident_node(NType t, char* str){
     }
     p->type = t;
     p->variable = (char*)malloc(sizeof(char)*strlen(str));
-    if((p->variable == NULL){
+    if(p->variable == NULL){
         yyerror("out of memory");
     }
     strcpy(p->variable, str);
@@ -89,7 +89,7 @@ Node* build_array_node(NType t, char* str, Node* p1){
     p->type = t;
     p->variable = (char*)malloc(sizeof(char)*strlen(str));
 
-    if((p->variable == NULL){
+    if(p->variable == NULL){
         yyerror("out of memory");
     }
     strcpy(p->variable, str);
