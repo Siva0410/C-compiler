@@ -100,9 +100,39 @@ Node* build_array_node(NType t, char* str, Node* p1){
 
 void printTree(Node* p)
 {
-    // printf("(");
+    FILE *fp;
+    char init_str[] = "\
+    INITIAL_GP = 0x10008000		# initial value of global pointer\n\
+	INITIAL_SP = 0x7ffffffc		# initial value of stack pointer\n\
+	# system call service number\n\
+	stop_service = 99\n\
+\n\
+	.text\n\
+init:\n\
+	# initialize $gp (global pointer) and $sp (stack pointer)\n\
+	la	$gp, INITIAL_GP		# (下の2行に置き換えられる)\n\
+#	lui	$gp, 0x1000		# $gp <- 0x10008000 (INITIAL_GP)\n\ 
+#	ori	$gp, $gp, 0x8000\n\
+	la	$sp, INITIAL_SP		# (下の2行に置き換えられる)\n\
+#	lui	$sp, 0x7fff		# $sp <- 0x7ffffffc (INITIAL_SP)\n\
+#	ori	$sp, $sp, 0xfffc\n\
+	jal	main			# jump to `main'\n\
+	nop				# (delay slot)\n\
+	li	$v0, stop_service	# $v0 <- 99 (stop_service)\n\
+	syscall				# stop\n\
+	nop\n\
+	# not reach here\n\
+stop:					# if syscall return\n\
+	j stop				# infinite loop...\n\
+	nop				# (delay slot)\n\
+\n\
+	.text 	0x00001000";
+
+    fp = fopen("program.s","w");
+    
+    
     if (p != NULL) {
-        
+        fprintf(fp,"%s\n",init_str);    
         switch(p->type){
         case PROGRAM_AST:
             printf("program: ");
