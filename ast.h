@@ -1,7 +1,8 @@
 typedef enum {
     PROGRAM_AST, //プログラムのノード型
-    DCLRS_AST, //宣言の集合のノード型
+    DCLRS_AST, //宣言のzentaiのノード型
     DCLR_AST, //宣言のノード型
+    DEFINE_AST, //define str node
     STMTS_AST, //構文の集合のノード型
     STMT_AST, //構文のノード型
     ASSIGN_AST, //代入文のノード型
@@ -21,6 +22,11 @@ typedef enum {
     WHILE_AST,  // whileのノード型
     IF_AST,     // ifのノード型
 } NType;
+
+typedef enum {
+    GROBAL,
+    LOCAL,
+} SScope;
 
 typedef struct node{
     NType type;
@@ -47,7 +53,7 @@ typedef struct array{
 typedef struct simTableEntry {
     char name[SIMNAMELEN];
     //SType type;
-    //SScope scope;
+    SScope scope;
     //SSize size;
     //SValue value;
 } SimTableEntry;
@@ -57,8 +63,8 @@ SimTableEntry simTable[MAXSIMENTRIES];
 Node* build_node(NType t, Node* p1);
 Node* build_node2(NType t, Node* p1, Node* p2);
 Node* build_node3(NType t, Node* p1, Node* p2, Node* p3);
-Node* build_assign_node(NType t, char* str, Node* p1);
 Node* build_num_node(NType t, int n);
 Node* build_ident_node(NType t, char* str);
 Node* build_array_node(NType t, char* str, Node* p1);
-void printTree(Node *obj);
+void printTree(Node *obj,FILE *fp1,FILE *fp2);
+Node* build_ident_node2(NType t, char *s,Node*p1, Node* p2);

@@ -76,7 +76,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 10 "basic.y" /* yacc.c:1909  */
+#line 11 "basic.y" /* yacc.c:1909  */
 
     Node* np;  //抽象構文木
     int ival; //変数

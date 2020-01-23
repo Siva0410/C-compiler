@@ -1,10 +1,11 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include "ast.h"
 #include "basic.tab.h"
 extern int yylex();
 extern int yyerror();
-Node* top;
+Node* top,*tmp;
 %}
 
 %union{
@@ -16,21 +17,26 @@ Node* top;
 %token DEFINE ARRAY WHILE IF ELSE SEMIC PLUS TIMES MINUS DEVIDE ASSIGN EQUAL LT RT REM LPAR RPAR L_BRACKET R_BRACKET L_BRACE R_BRACE
 %token <sp> IDENT
 %token <ival> NUMBER
-%type <np> program declarations statements decl_statement array_stmt statement loop_stmt cond_stmt assignment_stmt expression term factor var condition 
+%type <np> program declarations declaration statements decl_statement array_stmt statement loop_stmt cond_stmt assignment_stmt expression term factor var condition 
 %%
 
-program : declarations statements {top = build_node2(PROGRAM_AST,$1,$2);}
+program : declarations statements {
+    $$ = build_node2(PROGRAM_AST,$1,$2);
+    top = $$;
+ }
 ;
 
-declarations : decl_statement declarations {$$ = build_node2(DCLRS_AST,$1,$2);}
-| decl_statement {$$ = build_node(DCLRS_AST,$1);}
+declarations : declaration {$$ = build_node(DCLRS_AST,$1);}
+
+declaration : decl_statement declaration {$$ = build_node2(DCLR_AST,$1,$2);}
+| decl_statement {$$ = build_node(DCLR_AST,$1);}
 ;   
 
-decl_statement : DEFINE IDENT SEMIC {$$ = build_ident_node(DCLR_AST,$2);}
-| ARRAY array_stmt SEMIC {$$ = build_node(DCLR_AST,$2);}
+decl_statement : DEFINE IDENT SEMIC {$$ = build_ident_node(DEFINE_AST,$2);}
+| ARRAY array_stmt SEMIC {$$ = build_node(DEFINE_AST,$2);}
 ; 
 
- array_stmt : IDENT L_BRACKET expression R_BRACKET {$$ = build_array_node(ARRAY_AST,$1,$3);}
+array_stmt : IDENT L_BRACKET expression R_BRACKET {$$ = build_array_node(ARRAY_AST,$1,$3);}
 ;
 
 statements : statement statements {$$ = build_node2(STMTS_AST,$1,$2);}
@@ -42,7 +48,7 @@ statement : assignment_stmt SEMIC {$$ = build_node(STMT_AST,$1);}
 | cond_stmt {$$ = build_node(STMT_AST,$1);}
 ;
 
-assignment_stmt : IDENT ASSIGN expression {$$ = build_assign_node(ASSIGN_AST,$1,$3);} 
+assignment_stmt : IDENT ASSIGN expression { $$=build_ident_node2(ASSIGN_AST, $1, $3, NULL); } 
 | array_stmt ASSIGN expression {$$ = build_node2(ASSIGN_AST,$1,$3);}
 ;
 
@@ -101,10 +107,27 @@ cond_op : EQUAL
 int main(void){
     int result;
     Node *parse_result = NULL;
+    FILE *text_fp, *data_fp, *fp;
+    char c[1024];
     result =yyparse();
     parse_result = top;
     if(!result){
-        printTree(parse_result);
+        text_fp = fopen("text.s","wr");
+        data_fp = fopen("data.s","wr");
+        fp = fopen("program.s","w");
+
+        printTree(parse_result,text_fp,data_fp);
+        
+        while ((fgets(c,1024,text_fp)) != NULL) {
+            fputs(c, fp);
+        }
+        while ((fgets(c,1024,data_fp)) != NULL) {
+            fputs(c, fp);
+        }
+
+        fclose(text_fp);
+        fclose(data_fp);
+        fclose(fp);
     }
     return 0;
 }

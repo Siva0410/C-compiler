@@ -10,11 +10,11 @@ all: $(PROGRAM)
 $(PROGRAM): lex.yy.c basic.tab.c $(OBJS) $(HDRS)
 	$(CC) $(OBJS) $(LDFLAGS) $(LIBS) -o $(PROGRAM) 
 lex.yy.c:  basic.l 
-	$(LEX) basic.l 
-lex.yy.o: lex.yy.c
-	$(CC) lex.yy.c -c
+	$(LEX) basic.l
 basic.tab.c: basic.y 
 	$(YACC) basic.y
+lex.yy.o: lex.yy.c
+	$(CC) lex.yy.c -c
 basic.tab.o:
 	$(CC) basic.tab.c -c 
 ast.o: ast.c ast.h

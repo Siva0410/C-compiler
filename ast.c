@@ -28,18 +28,6 @@ Node* build_node2(NType t, Node* p1, Node* p2){
 }
 
 
-Node* build_assign_node(NType t, char* str, Node* p2){
-    Node *p;
-    if((p = (Node *)malloc(sizeof(Node))) == NULL){
-        // yyerror("out of memory");
-    }
-    p->type = t;
-    p->child = p2;
-    p->brother = NULL;
-    return p;
-}
-
-
 Node* build_node3(NType t, Node* p1, Node* p2, Node* p3){
     Node *p;
     if((p = (Node *)malloc(sizeof(Node))) == NULL){
@@ -81,6 +69,29 @@ Node* build_ident_node(NType t, char* str){
     return p;
 }
 
+Node* build_ident_node2(NType t, char *str,Node*p1, Node* p2){
+    Node *p;
+    
+    p = (Node *)malloc(sizeof(Node));
+    if(p == NULL){
+        yyerror("out of memory");
+    }
+    p->type = t;
+    
+    p->variable = (char *)malloc(sizeof(char)*strlen(str));
+    if(p->variable == NULL){
+        yyerror("out of memory");
+    }
+    
+    strncpy(p->variable, str, sizeof(char)*strlen(str));
+    p->child = p1;
+    p1->brother = p2; // p->child->brother = p2でもよい
+    p->brother = NULL;
+    
+    return p;
+    
+} 
+
 Node* build_array_node(NType t, char* str, Node* p1){
     Node *p;
     if((p = (Node *)malloc(sizeof(Node))) == NULL){
@@ -98,139 +109,188 @@ Node* build_array_node(NType t, char* str, Node* p1){
     return p;
 }
 
-void printTree(Node* p)
-{
-    FILE *fp;
+/***************************************************************************************/
+void initial_print(FILE* text_fp){
     char init_str[] = "\
-    INITIAL_GP = 0x10008000		# initial value of global pointer\n\
+\tINITIAL_GP = 0x10008000		# initial value of global pointer\n \
 	INITIAL_SP = 0x7ffffffc		# initial value of stack pointer\n\
-	# system call service number\n\
-	stop_service = 99\n\
+\t# system call service number\n\
+\tstop_service = 99\n\
 \n\
-	.text\n\
+\t.text\n\
 init:\n\
-	# initialize $gp (global pointer) and $sp (stack pointer)\n\
-	la	$gp, INITIAL_GP		# (下の2行に置き換えられる)\n\
-#	lui	$gp, 0x1000		# $gp <- 0x10008000 (INITIAL_GP)\n\ 
-#	ori	$gp, $gp, 0x8000\n\
-	la	$sp, INITIAL_SP		# (下の2行に置き換えられる)\n\
-#	lui	$sp, 0x7fff		# $sp <- 0x7ffffffc (INITIAL_SP)\n\
-#	ori	$sp, $sp, 0xfffc\n\
-	jal	main			# jump to `main'\n\
-	nop				# (delay slot)\n\
-	li	$v0, stop_service	# $v0 <- 99 (stop_service)\n\
-	syscall				# stop\n\
-	nop\n\
-	# not reach here\n\
+\t# initialize $gp (global pointer) and $sp (stack pointer)\n\
+\tla	$gp, INITIAL_GP\n\
+\tla	$sp, INITIAL_SP\n\
+\tjal	main			# jump to `main'\n\
+\tnop				# (delay slot)\n\
+\tli	$v0, stop_service	# $v0 <- 99 (stop_service)\n\
+\tsyscall				# stop\n\
+\tnop\n\
+\t# not reach here\n\
 stop:					# if syscall return\n\
-	j stop				# infinite loop...\n\
-	nop				# (delay slot)\n\
+\tj stop				# infinite loop...\n\
+\tnop				# (delay slot)\n\
 \n\
-	.text 	0x00001000";
+\t.text 	0x00001000\n\
+main:\n";
+    
 
-    fp = fopen("program.s","w");
-    
-    
+    fprintf(text_fp,"%s",init_str);
+    fprintf(text_fp,"\tsubu  $sp, $sp, 32\n\tsw  $ra, 28($sp)\n");
+}
+
+void tail_print(FILE* text_fp){
+    fprintf(text_fp,"end:\n\tlw  $ra, 28($sp)\n\taddu  $sp, $sp, 32\n");
+    fprintf(text_fp,"\tjr $ra\n");
+}
+
+void assign_print(Node* p,FILE* text_fp){
+    fprintf(text_fp,"\tli   $t0, %s\n",p->child->variable);
+    //if(staNum == 0 && regNum == 1){
+    fprintf(text_fp,"\tsw   $v0, 0($t0)\n");        
+    //}else if(staNum != 0){
+    //  fprintf(fp, "\tlw   $v0, %d($sp)\n",staNum-4);
+    //  fprintf(fp,"\tsw   $v0, 0($t4)\n");      
+    //}
+}
+/*
+void assign_print(Node* p,FILE* sata_fp){
+
+}
+
+void assign_print(Node* p,FILE* sata_fp){
+
+}
+
+void assign_print(Node* p,FILE* sata_fp){
+
+}
+*/
+/***************************************************************************************/
+
+void switchNode(Node *p,FILE *text_fp,FILE *data_fp){
+
+        if (p->child != NULL) {
+            printTree(p->child,text_fp,data_fp);      
+        }         
+        if (p->brother != NULL) {
+            printTree(p->brother,text_fp,data_fp);            
+        }
+}
+
+void printTree(Node* p,FILE *text_fp,FILE *data_fp){
+
     if (p != NULL) {
-        fprintf(fp,"%s\n",init_str);    
         switch(p->type){
+
         case PROGRAM_AST:
-            printf("program: ");
+            initial_print(text_fp);
+            switchNode(p,text_fp,data_fp);
+            tail_print(text_fp);
             break;
         case DCLRS_AST:
-            printf("declarations: ");
+            fprintf(data_fp,"\t.data   0x10004000\n");
+            switchNode(p,text_fp,data_fp);
             break;
         case DCLR_AST:
-            printf("declaration: ");
+            switchNode(p,text_fp,data_fp);
+            break;
+        case DEFINE_AST:
+            fprintf(data_fp,"%s:\t.word   0x00000000\n",p->variable);
+            switchNode(p,text_fp,data_fp);
             break;    
-            /*case DeclStmt_AST:
-            printf("decl_statement: ");
-            break;*/
         case ARRAY_AST:
-            printf("array: ");
+            switchNode(p,text_fp,data_fp);
+            //printf("array: ");
             break;    
         case STMTS_AST:
-            printf("statements: ");
+            switchNode(p,text_fp,data_fp);
+            //printf("statements: ");
             break;  
         case STMT_AST:
-            printf("statement: ");
+            switchNode(p,text_fp,data_fp);
+            printf("a\n");
             break;
         case ASSIGN_AST:
-            printf("assigment_stmt: ");
+            printf("b\n");
+            switchNode(p,text_fp,data_fp);
+            printf("b-2\n");
+            assign_print(p,text_fp);
             break;    
         case EXPRESS_AST:
-            printf("expression: ");
+            printf("c\n");
+            switchNode(p,text_fp,data_fp);
+            p->value = p->child->value;
+            //fprintf(text_fp,"    add  $v0, $v0, $zero\n");
             break; 
         case PLUS_AST:
-            printf("add: ");
+            switchNode(p,text_fp,data_fp);
             break;
         case MINUS_AST:
-            printf("sub: ");
+            switchNode(p,text_fp,data_fp);
+            //printf("sub: ");
             break;    
             /*case REM_AST:
-            printf("rem: ");
-            break;*/
+              printf("rem: ");
+              break;*/
         case TIMES_AST:
-            printf("mul: ");
+            switchNode(p,text_fp,data_fp);
+            //printf("mul: ");
             break;
         case DEVIDE_AST:
-            printf("div: ");
+            switchNode(p,text_fp,data_fp);
+            //printf("div: ");
             break;    
         case TERM_AST:
-            printf("term: ");
+            printf("d\n");
+            switchNode(p,text_fp,data_fp);
+            p->value = p->child->value;
+            //fprintf(text_fp,"    add  $v0, $v0, $zero\n");
             break; 
         case FACTOR_AST:
-            printf("factor: ");
+            printf("e\n");
+            switchNode(p,text_fp,data_fp);
+            p->value = p->child->value;
+            fprintf(text_fp,"%d\n",p->child->value);
+            //fprintf(text_fp,"    add  $v0, $v0, $zero\n");
             break;
         case IDENT_AST:
-            printf("ident: ");
+            printf("f\n");
+            //fprintf(text_fp,"\tli  $v0, %d\n",p->value);
+            //fprintf(text_fp,"\tli  $t0, %s\n\tlw  $v0, 0($t0)\n",p->variable);
             break;    
         case NUM_AST:
-            printf("number: ");
+            printf("g\n");
+            fprintf(text_fp,"\tli  $v0, %d\n",p->value);
             break;
             /*case Var_AST:
-            printf("var: ");
-            break;*/
+              printf("var: ");
+              break;*/
         case WHILE_AST:
-            printf("loop_stmt: ");
+            switchNode(p,text_fp,data_fp);
+            //printf("loop_stmt: ");
             break;    
         case IF_AST:
-            printf("cond_stmt: ");
+            switchNode(p,text_fp,data_fp);
+            //printf("cond_stmt: ");
             break; 
         case EQUAL_AST:
-            printf("EQ: ");
+            switchNode(p,text_fp,data_fp);
+//        fprintf(text_fp,"    %s = %d\n",p->child->variable,p->child->brother->value);
             break;
         case LT_AST:
-            printf("LT: ");
+            switchNode(p,text_fp,data_fp);
+            //printf("LT: ");
             break;    
         case RT_AST:
-            printf("RT: ");
+            switchNode(p,text_fp,data_fp);
+            //printf("RT: ");
             break;    
         default:
+            fprintf(stderr,"error!");
             break;
         }
-
-        if(p->variable != NULL){
-            printf("%s\t", p->variable);
-        }else{
-            printf("NO IDENT\t");
-        }
-        
-        printf("%d\t",p->value);
-        
-        
-        /* if (p->brother != NULL) { */
-        /*     printTree(p->brother);             */
-        /* } */
-        if (p->child != NULL) {
-            printf("(");
-            printTree(p->child);
-            printf(")");       
-        }         
-         if (p->brother != NULL) {
-            printTree(p->brother);            
-        }
     }
-
 }
 
