@@ -1707,23 +1707,29 @@ int main(void){
     int result;
     Node *parse_result = NULL;
     FILE *text_fp, *data_fp, *fp;
-    char c[1024];
+    char c;
     result =yyparse();
     parse_result = top;
     if(!result){
-        text_fp = fopen("text.s","wr");
-        data_fp = fopen("data.s","wr");
+        text_fp = fopen("text.s","w");
+        data_fp = fopen("data.s","w");
         fp = fopen("program.s","w");
 
         printTree(parse_result,text_fp,data_fp);
-        
-        while ((fgets(c,1024,text_fp)) != NULL) {
-            fputs(c, fp);
-        }
-        while ((fgets(c,1024,data_fp)) != NULL) {
-            fputs(c, fp);
-        }
 
+        fclose(text_fp);
+        fclose(data_fp);
+
+        text_fp = fopen("text.s","r");
+        data_fp = fopen("data.s","r");
+        
+        while ((c=fgetc(text_fp)) != EOF) {
+            fputc(c, fp);
+        }
+        while ((c=fgetc(data_fp)) != EOF) {
+            fputc(c, fp);
+        }
+        
         fclose(text_fp);
         fclose(data_fp);
         fclose(fp);
