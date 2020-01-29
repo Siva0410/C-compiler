@@ -6,6 +6,8 @@
 int stack_num = 0;
 int loop_num = 0;
 int cond_num = 0;
+int eq_num = 0;
+
 Node* build_node(NType t, Node* p1){
     Node *p;
     if((p = (Node *)malloc(sizeof(Node))) == NULL){
@@ -296,7 +298,15 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             cond_num = cond_num+3;
             break; 
         case EQUAL_AST:
-            switchNode(p,text_fp,data_fp);
+            printTree(p->child,text_fp,data_fp); 
+            fprintf(text_fp,"\tlw $t0, 0($sp)\n\tnop\n");
+            fprintf(text_fp,"\tlw $t1, 4($sp)\n\tnop\n");
+            fprintf(text_fp,"\tslt  $v0, $t0, $t1\n");
+            fprintf(text_fp,"\tslt  $v1, $t1, $t0\n");
+            fprintf(text_fp,"\tbne  $v0, $v1, EQ%d\n",eq_num);
+            fprintf(text_fp,"\tli  $v0, 1\n");
+            fprintf(text_fp,"EQ%d:\n",eq_num++);
+            stack_num = 0;
 //        fprintf(text_fp,"    %s = %d\n",p->child->variable,p->child->brother->value);
             break;
         case LT_AST:
@@ -307,7 +317,11 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             stack_num = 0;
             break;    
         case RT_AST:
-            switchNode(p,text_fp,data_fp);
+            printTree(p->child,text_fp,data_fp); 
+            fprintf(text_fp,"\tlw $t0, 0($sp)\n\tnop\n");
+            fprintf(text_fp,"\tlw $t1, 4($sp)\n\tnop\n");
+            fprintf(text_fp,"\tslt  $v0, $t1, $t0\n");
+            stack_num = 0;
             break;    
         default:
             fprintf(stderr,"error!");
