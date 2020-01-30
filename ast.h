@@ -3,17 +3,21 @@ typedef enum {
     DCLRS_AST, //宣言のzentaiのノード型
     DCLR_AST, //宣言のノード型
     DEFINE_AST, //define str node
+    DEF_ARRAY_AST,
+    DEF_WARRAY_AST,
     STMTS_AST, //構文の集合のノード型
     STMT_AST, //構文のノード型
     ASSIGN_AST, //代入文のノード型
     ASSIGN_ARRAY_NUM_AST,
     ASSIGN_ARRAY_IDENT_AST,
+    ASSIGN_WARRAY_NUM_AST,
+    ASSIGN_WARRAY_IDENT_AST,
     EXPRESS_AST, //式のノード型
     IDENT_AST, //変数のノード型
-    ARRAY_AST, //配列のノード型
     ARRAY_NUM_AST,
     ARRAY_IDENT_AST,
-    DEF_ARRAY_AST,
+    WARRAY_NUM_AST,
+    WARRAY_IDENT_AST,
     NUM_AST,   //整数のノード型
     FACTOR_AST, //因子のノード型
     TERM_AST, //項のノード型
@@ -42,8 +46,10 @@ typedef enum {
 typedef struct node{
     NType type;
     int value;
+    int value2;
     char* variable; 
     char* ident;
+    char* ident2;
     struct node *child;
     struct node *brother;
 } Node;
@@ -65,8 +71,8 @@ typedef struct array{
 typedef struct simTableEntry {
     char name[SIMNAMELEN];
     //SType type;
-    SScope scope;
-    //SSize size;
+    //SScope scope;
+    int wide, height;
     //SValue value;
 } SimTableEntry;
 
@@ -83,5 +89,9 @@ Node* build_array_num_node(NType t, char* str, int num);
 Node* build_array_ident_node(NType t, char* str, char* ident);
 Node* build_array_num_node2(NType t, char* str, int num, Node* p1);
 Node* build_array_ident_node2(NType t, char* str, char* ident, Node* p1);
+Node* build_warray_num_node(NType t, char* str, int num1, int num2);
+Node* build_warray_ident_node(NType t, char* str, char* ident1, char* ident2);
+Node* build_warray_num_node2(NType t, char* str, int num1, int num2, Node* p1);
+Node* build_warray_ident_node2(NType t, char* str, char* ident1, char* ident2, Node* p1);
 void printTree(Node *obj,FILE *fp1,FILE *fp2);
 

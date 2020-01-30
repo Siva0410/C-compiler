@@ -3,6 +3,7 @@
 #include <string.h>
 #include "ast.h"
 
+int sim_cnt=0;
 int stack_num = 0;
 int loop_num = 0;
 int loop_rec = 0;
@@ -14,6 +15,9 @@ int leq_num = 0;
 int req_num = 0;
 int for_num = 0;
 int for_rec = 0;
+int i,j;
+int sim_num;
+
 
 Node* build_node(NType t, Node* p1){
     Node *p;
@@ -136,6 +140,25 @@ Node* build_array_num_node(NType t, char* str, int num){
     return p;
 }
 
+Node* build_warray_num_node(NType t, char* str, int num1, int num2){
+    Node *p;
+    if((p = (Node *)malloc(sizeof(Node))) == NULL){
+        yyerror("out of memory");
+    }
+    p->type = t;
+    p->variable = (char*)malloc(sizeof(char)*strlen(str));
+
+    if(p->variable == NULL){
+        yyerror("out of memory");
+    }
+    strcpy(p->variable, str);
+    p->value = num1;
+    p->value2 = num2;
+    p->child = NULL;
+    p->brother = NULL;
+    return p;
+}
+
 Node* build_array_num_node2(NType t, char* str, int num, Node* p1){
     Node *p;
     if((p = (Node *)malloc(sizeof(Node))) == NULL){
@@ -154,6 +177,24 @@ Node* build_array_num_node2(NType t, char* str, int num, Node* p1){
     return p;
 }
 
+Node* build_warray_num_node2(NType t, char* str, int num1,int num2, Node* p1){
+    Node *p;
+    if((p = (Node *)malloc(sizeof(Node))) == NULL){
+        yyerror("out of memory");
+    }
+    p->type = t;
+    p->variable = (char*)malloc(sizeof(char)*strlen(str));
+
+    if(p->variable == NULL){
+        yyerror("out of memory");
+    }
+    strcpy(p->variable, str);
+    p->value = num1;
+    p->value2 = num2;
+    p->child = p1;
+    p->brother = NULL;
+    return p;
+}
 
 Node* build_array_ident_node(NType t, char* str, char* ident){
     Node *p;
@@ -179,7 +220,37 @@ Node* build_array_ident_node(NType t, char* str, char* ident){
     return p;
 }
 
-Node* build_array_ident_node2(NType t, char* str, char* ident, Node* p1){
+Node* build_warray_ident_node(NType t, char* str, char* ident1, char* ident2){
+    Node *p;
+    if((p = (Node *)malloc(sizeof(Node))) == NULL){
+        yyerror("out of memory");
+    }
+    p->type = t;
+    p->variable = (char*)malloc(sizeof(char)*strlen(str));
+    if(p->variable == NULL){
+        yyerror("out of memory");
+    }
+
+    p->ident = (char*)malloc(sizeof(char)*strlen(str));
+    if(p->ident == NULL){
+        yyerror("out of memory");
+    }
+
+    p->ident2 = (char*)malloc(sizeof(char)*strlen(str));
+    if(p->ident == NULL){
+        yyerror("out of memory");
+    }
+
+    strcpy(p->variable, str);
+    strcpy(p->ident, ident1);
+    strcpy(p->ident, ident2);
+
+    p->child = NULL;
+    p->brother = NULL;
+    return p;
+}
+
+Node* build_array_ident_node2(NType t, char* str, char* ident,  Node* p1){
     Node *p;
     if((p = (Node *)malloc(sizeof(Node))) == NULL){
         yyerror("out of memory");
@@ -197,6 +268,36 @@ Node* build_array_ident_node2(NType t, char* str, char* ident, Node* p1){
 
     strcpy(p->variable, str);
     strcpy(p->ident, ident);
+
+    p->child = p1;
+    p->brother = NULL;
+    return p;
+}
+
+Node* build_warray_ident_node2(NType t, char* str, char* ident1, char* ident2, Node* p1){
+    Node *p;
+    if((p = (Node *)malloc(sizeof(Node))) == NULL){
+        yyerror("out of memory");
+    }
+    p->type = t;
+    p->variable = (char*)malloc(sizeof(char)*strlen(str));
+    if(p->variable == NULL){
+        yyerror("out of memory");
+    }
+
+    p->ident = (char*)malloc(sizeof(char)*strlen(str));
+    if(p->ident == NULL){
+        yyerror("out of memory");
+    }
+
+    p->ident2 = (char*)malloc(sizeof(char)*strlen(str));
+    if(p->ident == NULL){
+        yyerror("out of memory");
+    }
+
+    strcpy(p->variable, str);
+    strcpy(p->ident, ident1);
+    strcpy(p->ident2, ident2);
 
     p->child = p1;
     p->brother = NULL;
@@ -238,23 +339,6 @@ void tail_print(FILE* text_fp){
     fprintf(text_fp,"\tjr $ra\n\n");
 }
 
-void assign_print(Node* p,FILE* text_fp){
-    fprintf(text_fp,"\tli   $t0, %s\n",p->variable);
-    fprintf(text_fp,"\tsw   $v0, 0($t0)\n");        
-}
-/*
-void assign_print(Node* p,FILE* sata_fp){
-
-}
-
-void assign_print(Node* p,FILE* sata_fp){
-
-}
-
-void assign_print(Node* p,FILE* sata_fp){
-
-}
-*/
 /***************************************************************************************/
 
 void switchNode(Node *p,FILE *text_fp,FILE *data_fp){
@@ -296,6 +380,21 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(data_fp,"%s:\t.space  %d\n",p->variable,p->value*4);
             switchNode(p,text_fp,data_fp);
             break;    
+            
+        case DEF_WARRAY_AST:
+            fprintf(data_fp,"%s:\n",p->variable);
+            strcpy(simTable[sim_cnt].name,p->variable);
+            simTable[sim_cnt].wide = p->value;
+            simTable[sim_cnt++].height = p->value2;
+            for(i=0; i<p->value;i++){
+                fprintf(data_fp,"\t.word ");
+                for(j=0; j<p->value2;j++){
+                    fprintf(data_fp,"\t0x00000000");
+                }
+                fprintf(data_fp,"\n");
+            }
+            switchNode(p,text_fp,data_fp);
+            break;    
 
         case ARRAY_NUM_AST:
             fprintf(text_fp,"\tli  $t0, %s\n\tlw  $v0, %d($t0)\n\tnop\n",p->variable,p->value*4);
@@ -303,7 +402,25 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             stack_num++;
             break;  
 
+        case WARRAY_NUM_AST:
+            sim_num=0;
+            for(i=0; strcmp(simTable[i].name, p->variable)!= 0;i++){sim_num = i;}
+            fprintf(text_fp,"\tli  $t0, %s\n",p->variable);
+            fprintf(text_fp,"\tlw  $v0, %d($t0)\n\tnop\n",p->value2*simTable[sim_num].wide*4 + p->value*4);
+            fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
+            stack_num++;
+            break;  
+
         case ARRAY_IDENT_AST:
+            fprintf(text_fp,"\tli  $t0, %s\n",p->variable);
+            fprintf(text_fp,"\tli  $t1, %s\n\tlw  $t2, 0($t1)\n\tnop\n",p->ident);
+            fprintf(text_fp,"\tsll  $t2, $t2, 2\n");
+            fprintf(text_fp,"\tadd  $t0, $t0, $t2\n\tlw  $v0, 0($t0)\n\tnop\n");
+            fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
+            stack_num++;
+            break;
+
+        case WARRAY_IDENT_AST:
             fprintf(text_fp,"\tli  $t0, %s\n",p->variable);
             fprintf(text_fp,"\tli  $t1, %s\n\tlw  $t2, 0($t1)\n\tnop\n",p->ident);
             fprintf(text_fp,"\tsll  $t2, $t2, 2\n");
@@ -331,6 +448,14 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             switchNode(p,text_fp,data_fp);
             fprintf(text_fp,"\tli   $t0, %s\n",p->variable);
             fprintf(text_fp,"\tsw   $v0, %d($t0)\n",p->value*4);
+            stack_num = 0;
+            break;  
+
+        case ASSIGN_WARRAY_NUM_AST:
+            switchNode(p,text_fp,data_fp);
+            for(i=0; simTable[i].name != p->variable;i++){sim_num = i;}
+            fprintf(text_fp,"\tli   $t0, %s\n",p->variable);
+            fprintf(text_fp,"\tsw   $v0, %d($t0)\n",p->value2*simTable[sim_num].wide*4 + p->value*4);
             stack_num = 0;
             break;  
 

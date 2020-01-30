@@ -34,6 +34,9 @@ declaration : decl_statement declaration {$$ = build_node2(DCLR_AST,$1,$2);}
 
 decl_statement : DEFINE IDENT SEMIC {$$ = build_ident_node(DEFINE_AST,$2);}
 | ARRAY IDENT L_BRACKET NUMBER R_BRACKET SEMIC {$$ = build_array_num_node(DEF_ARRAY_AST,$2,$4);}
+| ARRAY IDENT L_BRACKET NUMBER R_BRACKET L_BRACKET NUMBER R_BRACKET SEMIC {
+    $$ = build_warray_num_node(DEF_WARRAY_AST,$2,$4,$7);
+}
 ;
 
 statements : statement statements {$$ = build_node2(STMTS_AST,$1,$2);}
@@ -50,6 +53,8 @@ statement : assignment_stmt SEMIC {$$ = build_node(STMT_AST,$1);}
 assignment_stmt : IDENT ASSIGN expression {$$=build_ident_node2(ASSIGN_AST, $1, $3, NULL); } 
 | IDENT L_BRACKET NUMBER R_BRACKET ASSIGN expression {$$ = build_array_num_node2(ASSIGN_ARRAY_NUM_AST,$1,$3,$6);}
 | IDENT L_BRACKET IDENT R_BRACKET ASSIGN expression {$$ = build_array_ident_node2(ASSIGN_ARRAY_IDENT_AST,$1,$3,$6);}
+| IDENT L_BRACKET NUMBER R_BRACKET L_BRACKET NUMBER R_BRACKET ASSIGN expression {$$ = build_warray_num_node2(ASSIGN_WARRAY_NUM_AST,$1,$3,$6,$9);}
+| IDENT L_BRACKET IDENT R_BRACKET L_BRACKET IDENT R_BRACKET ASSIGN expression {$$ = build_warray_ident_node2(ASSIGN_WARRAY_IDENT_AST,$1,$3,$6,$9);}
 ;
 
 increment_stmt : INCREMENT IDENT {$$=build_ident_node(INCREMENT_AST, $2);}
@@ -85,6 +90,8 @@ var : IDENT {$$ = build_ident_node(IDENT_AST,$1);}
 | NUMBER {$$ = build_num_node(NUM_AST,$1);}
 | IDENT L_BRACKET NUMBER R_BRACKET {$$ = build_array_num_node(ARRAY_NUM_AST,$1,$3);}
 | IDENT L_BRACKET IDENT R_BRACKET {$$ = build_array_ident_node(ARRAY_IDENT_AST,$1,$3);}
+| IDENT L_BRACKET NUMBER R_BRACKET L_BRACKET NUMBER R_BRACKET {$$ = build_warray_num_node(WARRAY_NUM_AST,$1,$3,$6);}
+| IDENT L_BRACKET IDENT R_BRACKET L_BRACKET IDENT R_BRACKET {$$ = build_warray_ident_node(WARRAY_IDENT_AST,$1,$3,$6);}
 ; 
 
 loop_stmt : WHILE LPAR condition RPAR L_BRACE statements R_BRACE {$$ = build_node2(WHILE_AST,$3,$6);}
