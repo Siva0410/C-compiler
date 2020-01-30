@@ -58,16 +58,18 @@ extern int yydebug;
     ASSIGN = 268,
     EQUAL = 269,
     LT = 270,
-    RT = 271,
-    REM = 272,
-    LPAR = 273,
-    RPAR = 274,
-    L_BRACKET = 275,
-    R_BRACKET = 276,
-    L_BRACE = 277,
-    R_BRACE = 278,
-    IDENT = 279,
-    NUMBER = 280
+    LTE = 271,
+    RT = 272,
+    RTE = 273,
+    REM = 274,
+    LPAR = 275,
+    RPAR = 276,
+    L_BRACKET = 277,
+    R_BRACKET = 278,
+    L_BRACE = 279,
+    R_BRACE = 280,
+    IDENT = 281,
+    NUMBER = 282
   };
 #endif
 
@@ -83,7 +85,7 @@ union YYSTYPE
     char* sp;
  
 
-#line 87 "basic.tab.h" /* yacc.c:1909  */
+#line 89 "basic.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

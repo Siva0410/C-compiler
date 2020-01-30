@@ -6,9 +6,14 @@ typedef enum {
     STMTS_AST, //構文の集合のノード型
     STMT_AST, //構文のノード型
     ASSIGN_AST, //代入文のノード型
+    ASSIGN_ARRAY_NUM_AST,
+    ASSIGN_ARRAY_IDENT_AST,
     EXPRESS_AST, //式のノード型
     IDENT_AST, //変数のノード型
     ARRAY_AST, //配列のノード型
+    ARRAY_NUM_AST,
+    ARRAY_IDENT_AST,
+    DEF_ARRAY_AST,
     NUM_AST,   //整数のノード型
     FACTOR_AST, //因子のノード型
     TERM_AST, //項のノード型
@@ -19,6 +24,9 @@ typedef enum {
     EQUAL_AST,
     LT_AST,
     RT_AST,
+    LTE_AST,
+    RTE_AST,
+    REM_AST,
     WHILE_AST,  // whileのノード型
     IF_AST,     // ifのノード型
     IFELSE_AST,     // ifelse
@@ -33,6 +41,7 @@ typedef struct node{
     NType type;
     int value;
     char* variable; 
+    char* ident;
     struct node *child;
     struct node *brother;
 } Node;
@@ -66,6 +75,9 @@ Node* build_node2(NType t, Node* p1, Node* p2);
 Node* build_node3(NType t, Node* p1, Node* p2, Node* p3);
 Node* build_num_node(NType t, int n);
 Node* build_ident_node(NType t, char* str);
-Node* build_array_node(NType t, char* str, Node* p1);
+Node* build_array_num_node(NType t, char* str, int num);
+Node* build_array_ident_node(NType t, char* str, char* ident);
+Node* build_array_num_node2(NType t, char* str, int num, Node* p1);
+Node* build_array_ident_node2(NType t, char* str, char* ident, Node* p1);
 void printTree(Node *obj,FILE *fp1,FILE *fp2);
 Node* build_ident_node2(NType t, char *s,Node*p1, Node* p2);

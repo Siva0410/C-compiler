@@ -20,7 +20,9 @@
 "="            { return ASSIGN; }
 "=="            { return EQUAL; }
 "<"            { return LT; }
+"<="            { return LTE; }
 ">"            { return RT; }
+">="            { return RTE; }
 "%"            { return REM; }
 
 "("            { return LPAR; }

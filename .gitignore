@@ -2,4 +2,4 @@
 *.o
 *.s*
 .history
-test.c
+test*.c

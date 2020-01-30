@@ -14,10 +14,10 @@ Node* top,*tmp;
     char* sp;
  }
 
-%token DEFINE ARRAY WHILE IF ELSE SEMIC PLUS TIMES MINUS DEVIDE ASSIGN EQUAL LT RT REM LPAR RPAR L_BRACKET R_BRACKET L_BRACE R_BRACE
+%token DEFINE ARRAY WHILE IF ELSE SEMIC PLUS TIMES MINUS DEVIDE ASSIGN EQUAL LT  LTE RT RTE REM LPAR RPAR L_BRACKET R_BRACKET L_BRACE R_BRACE
 %token <sp> IDENT
 %token <ival> NUMBER
-%type <np> program declarations declaration statements decl_statement array_stmt statement loop_stmt cond_stmt assignment_stmt expression term factor var condition 
+%type <np> program declarations declaration statements decl_statement statement loop_stmt cond_stmt assignment_stmt expression term factor var condition 
 %%
 
 program : declarations statements {
@@ -33,10 +33,7 @@ declaration : decl_statement declaration {$$ = build_node2(DCLR_AST,$1,$2);}
 ;   
 
 decl_statement : DEFINE IDENT SEMIC {$$ = build_ident_node(DEFINE_AST,$2);}
-| ARRAY array_stmt SEMIC {$$ = build_node(DEFINE_AST,$2);}
-; 
-
-array_stmt : IDENT L_BRACKET expression R_BRACKET {$$ = build_array_node(ARRAY_AST,$1,$3);}
+| ARRAY IDENT L_BRACKET NUMBER R_BRACKET SEMIC {$$ = build_array_num_node(DEF_ARRAY_AST,$2,$4);}
 ;
 
 statements : statement statements {$$ = build_node2(STMTS_AST,$1,$2);}
@@ -49,12 +46,13 @@ statement : assignment_stmt SEMIC {$$ = build_node(STMT_AST,$1);}
 ;
 
 assignment_stmt : IDENT ASSIGN expression { $$=build_ident_node2(ASSIGN_AST, $1, $3, NULL); } 
-| array_stmt ASSIGN expression {$$ = build_node2(ASSIGN_AST,$1,$3);}
+| IDENT L_BRACKET NUMBER R_BRACKET ASSIGN expression {$$ = build_array_num_node2(ASSIGN_ARRAY_NUM_AST,$1,$3,$6);}
+| IDENT L_BRACKET IDENT R_BRACKET ASSIGN expression {$$ = build_array_ident_node2(ASSIGN_ARRAY_IDENT_AST,$1,$3,$6);}
 ;
 
 expression : expression PLUS term {$$ = build_node2(PLUS_AST,$1,$3);}
 | expression MINUS term {$$ = build_node2(MINUS_AST,$1,$3);}
-| expression REM term 
+| expression REM term {$$ = build_node2(REM_AST,$1,$3);}
 | term {$$ = build_node(EXPRESS_AST,$1);}
 ;
 
@@ -79,7 +77,8 @@ rem_op : REM;
 */
 var : IDENT {$$ = build_ident_node(IDENT_AST,$1);}
 | NUMBER {$$ = build_num_node(NUM_AST,$1);}
-| array_stmt {$$ = build_node(ARRAY_AST,$1);}
+| IDENT L_BRACKET NUMBER R_BRACKET {$$ = build_array_num_node(ARRAY_NUM_AST,$1,$3);}
+| IDENT L_BRACKET IDENT R_BRACKET {$$ = build_array_ident_node(ARRAY_IDENT_AST,$1,$3);}
 ; 
 
 loop_stmt : WHILE LPAR condition RPAR L_BRACE statements R_BRACE {$$ = build_node2(WHILE_AST,$3,$6);}
@@ -93,6 +92,8 @@ cond_stmt : IF LPAR condition RPAR L_BRACE statements R_BRACE {$$ = build_node2(
 condition : expression EQUAL expression {$$ = build_node2(EQUAL_AST,$1,$3);}
 | expression LT expression {$$ = build_node2(LT_AST,$1,$3);}
 | expression RT expression {$$ = build_node2(RT_AST,$1,$3);}
+| expression LTE expression {$$ = build_node2(LTE_AST,$1,$3);}
+| expression RTE expression {$$ = build_node2(RTE_AST,$1,$3);}
 ;
 
 /*
