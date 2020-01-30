@@ -86,7 +86,8 @@ loop_stmt : WHILE LPAR condition RPAR L_BRACE statements R_BRACE {$$ = build_nod
 ;
 
 cond_stmt : IF LPAR condition RPAR L_BRACE statements R_BRACE {$$ = build_node2(IF_AST,$3,$6);}
-| IF LPAR condition RPAR L_BRACE statements R_BRACE ELSE L_BRACE statements R_BRACE {$$ = build_node3(IF_AST,$3,$6,$10);}
+| IF LPAR condition RPAR L_BRACE statements R_BRACE ELSE L_BRACE statements R_BRACE {$$ = build_node3(IFELSE_AST,$3,$10,$6);}
+| IF LPAR condition RPAR L_BRACE statements R_BRACE ELSE cond_stmt {$$ = build_node3(IFELSE_AST,$3,$9,$6);}
 ;
 
 condition : expression EQUAL expression {$$ = build_node2(EQUAL_AST,$1,$3);}

@@ -21,6 +21,7 @@ typedef enum {
     RT_AST,
     WHILE_AST,  // whileのノード型
     IF_AST,     // ifのノード型
+    IFELSE_AST,     // ifelse
 } NType;
 
 typedef enum {
