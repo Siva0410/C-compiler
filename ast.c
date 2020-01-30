@@ -51,6 +51,20 @@ Node* build_node3(NType t, Node* p1, Node* p2, Node* p3){
     return p;
 }
 
+Node* build_node4(NType t, Node* p1, Node* p2, Node* p3, Node* p4){
+    Node *p;
+    if((p = (Node *)malloc(sizeof(Node))) == NULL){
+        // yyerror("out of memory");
+    }
+    p->type = t;
+    p->child = p1;
+    p1->brother = p2; // p->child->brother = p2でもよい
+    p2->brother = p3;
+    p3->brother = p4;
+    p->brother = NULL;
+    return p;
+}
+
 Node* build_num_node(NType t, int n){
     Node *p;
     if((p = (Node *)malloc(sizeof(Node))) == NULL){
@@ -261,26 +275,32 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             switchNode(p,text_fp,data_fp);
             tail_print(text_fp);
             break;
+
         case DCLRS_AST:
             fprintf(data_fp,"\t.data   0x10004000\n");
             switchNode(p,text_fp,data_fp);
             break;
+
         case DCLR_AST:
             switchNode(p,text_fp,data_fp);
             break;
+
         case DEFINE_AST:
             fprintf(data_fp,"%s:\t.word   0x0000\n",p->variable);
             switchNode(p,text_fp,data_fp);
             break;    
+
         case DEF_ARRAY_AST:
             fprintf(data_fp,"%s:\t.space  %d\n",p->variable,p->value*4);
             switchNode(p,text_fp,data_fp);
             break;    
+
         case ARRAY_NUM_AST:
             fprintf(text_fp,"\tli  $t0, %s\n\tlw  $v0, %d($t0)\n\tnop\n",p->variable,p->value*4);
             fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
             stack_num++;
             break;  
+
         case ARRAY_IDENT_AST:
             fprintf(text_fp,"\tli  $t0, %s\n",p->variable);
             fprintf(text_fp,"\tli  $t1, %s\n\tlw  $t2, 0($t1)\n\tnop\n",p->ident);
@@ -289,24 +309,29 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
             stack_num++;
             break;
+
         case STMTS_AST:
             switchNode(p,text_fp,data_fp);
             break;  
+
         case STMT_AST:
             switchNode(p,text_fp,data_fp);
             break;
+
         case ASSIGN_AST:
             switchNode(p,text_fp,data_fp);
             fprintf(text_fp,"\tli   $t0, %s\n",p->variable);
             fprintf(text_fp,"\tsw   $v0, 0($t0)\n");
             stack_num = 0;
             break;    
+
         case ASSIGN_ARRAY_NUM_AST:
             switchNode(p,text_fp,data_fp);
             fprintf(text_fp,"\tli   $t0, %s\n",p->variable);
             fprintf(text_fp,"\tsw   $v0, %d($t0)\n",p->value*4);
             stack_num = 0;
             break;  
+
         case ASSIGN_ARRAY_IDENT_AST:
             switchNode(p,text_fp,data_fp);
             fprintf(text_fp,"\tli  $t0, %s\n",p->variable);
@@ -315,10 +340,12 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(text_fp,"\tadd  $t0, $t0, $t2\n\tnop\n\tsw  $v0, 0($t0)\n\tnop\n");
             stack_num = 0;
             break; 
+
         case EXPRESS_AST:
             switchNode(p,text_fp,data_fp);
             //p->value = p->child->value;
             break; 
+
         case PLUS_AST:
             /*switchNode(p,text_fp,data_fp);
             fprintf(text_fp,"\tlw  $t0, 0($sp)\n");
@@ -333,9 +360,11 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
             stack_num++;
             break;
+
         case MINUS_AST:
             switchNode(p,text_fp,data_fp);
             break;    
+
         case REM_AST:
             switchNode(p,text_fp,data_fp);
             fprintf(text_fp,"\tlw  $t0, %d($sp)\n",(stack_num-2)*4);
@@ -346,6 +375,7 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
             stack_num++;
             break;
+
         case TIMES_AST:
             switchNode(p,text_fp,data_fp);
             fprintf(text_fp,"\tlw  $t0, %d($sp)\n",(stack_num-2)*4);
@@ -356,6 +386,7 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
             stack_num++;
             break;
+
         case DEVIDE_AST:
             switchNode(p,text_fp,data_fp);
             fprintf(text_fp,"\tlw  $t0, %d($sp)\n",(stack_num-2)*4);
@@ -366,24 +397,35 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
             stack_num++;
             break;    
+
         case TERM_AST:
             switchNode(p,text_fp,data_fp);
             //p->value = p->child->value;
             break; 
+
         case FACTOR_AST:
             switchNode(p,text_fp,data_fp);
             //p->value = p->child->value;
             break;
+
+        case INCREMENT_AST:
+            fprintf(text_fp,"\tli  $t0, %s\n\tlw  $v0, 0($t0)\n\tnop\n",p->variable);
+            fprintf(text_fp,"\taddi  $v0, $v0, 1\n\tnop\n");
+            fprintf(text_fp,"\tsw  $v0, 0($t0)\n");
+            break;  
+
         case IDENT_AST:
             fprintf(text_fp,"\tli  $t0, %s\n\tlw  $v0, 0($t0)\n\tnop\n",p->variable);
             fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
             stack_num++;
             break;    
+
         case NUM_AST:
             fprintf(text_fp,"\tli  $v0, %d\n",p->value);
             fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
             stack_num++;
             break;
+
         case WHILE_AST:
             fprintf(text_fp,"L%d_%d:\n",loop_rec,loop_num);
             printTree(p->child,text_fp,data_fp);
@@ -395,6 +437,7 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(text_fp,"L%d_%d:\n",loop_rec,loop_num+1);
             if(loop_rec==0) loop_num=loop_num+2;
             break;
+
         case IF_AST:
             printTree(p->child,text_fp,data_fp);
             fprintf(text_fp,"\tbeq  $v0, $zero, C%d\n",if_num);
@@ -402,6 +445,7 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(text_fp,"C%d:\n",if_num);
             if_num = if_num+1;
             break; 
+
         case IFELSE_AST:
             printTree(p->child,text_fp,data_fp);
             fprintf(text_fp,"\tbeq  $v0, $zero, CE%d_%d\n",if_else_rec,if_else_num);
@@ -416,6 +460,18 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(text_fp,"CE%d_%d:\n",if_else_rec,if_else_num+1);
             break; 
             
+        case FOR_AST:
+            fprintf(text_fp,"L%d_%d:\n",loop_rec,loop_num);
+            printTree(p->child,text_fp,data_fp);
+            fprintf(text_fp,"\tbeq  $v0, $zero, L%d_%d\n",loop_rec,loop_num+1);
+            loop_rec++;
+            printTree(p->child->brother,text_fp,data_fp);  
+            loop_rec--;
+            fprintf(text_fp,"\tj  L%d_%d\n",loop_rec,loop_num);
+            fprintf(text_fp,"L%d_%d:\n",loop_rec,loop_num+1);
+            if(loop_rec==0) loop_num=loop_num+2;
+            break;
+
         case EQUAL_AST:
             printTree(p->child,text_fp,data_fp); 
             fprintf(text_fp,"\tlw  $t0, %d($sp)\n",(stack_num-2)*4);
@@ -426,6 +482,7 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(text_fp,"EQ%d:\n",eq_num++);
             stack_num = 0;
             break;
+  
         case LT_AST:
             printTree(p->child,text_fp,data_fp); 
             fprintf(text_fp,"\tlw $t0, 0($sp)\n");

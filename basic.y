@@ -14,10 +14,10 @@ Node* top,*tmp;
     char* sp;
  }
 
-%token DEFINE ARRAY WHILE IF ELSE SEMIC PLUS TIMES MINUS DEVIDE ASSIGN EQUAL LT  LTE RT RTE REM LPAR RPAR L_BRACKET R_BRACKET L_BRACE R_BRACE
+%token DEFINE ARRAY WHILE IF ELSE SEMIC PLUS TIMES MINUS DEVIDE ASSIGN EQUAL LT  LTE RT RTE REM LPAR RPAR L_BRACKET R_BRACKET L_BRACE R_BRACE INCREMENT FOR
 %token <sp> IDENT
 %token <ival> NUMBER
-%type <np> program declarations declaration statements decl_statement statement loop_stmt cond_stmt assignment_stmt expression term factor var condition 
+%type <np> program declarations declaration statements decl_statement statement loop_stmt cond_stmt assignment_stmt expression term factor var condition increment_stmt for_stmt
 %%
 
 program : declarations statements {
@@ -41,13 +41,19 @@ statements : statement statements {$$ = build_node2(STMTS_AST,$1,$2);}
 ;
 
 statement : assignment_stmt SEMIC {$$ = build_node(STMT_AST,$1);}
+| increment_stmt {$$ = build_node(STMT_AST,$1);}
 | loop_stmt {$$ = build_node(STMT_AST,$1);}
 | cond_stmt {$$ = build_node(STMT_AST,$1);}
+| for_stmt {$$ = build_node(STMT_AST,$1);}
 ;
 
-assignment_stmt : IDENT ASSIGN expression { $$=build_ident_node2(ASSIGN_AST, $1, $3, NULL); } 
+assignment_stmt : IDENT ASSIGN expression {$$=build_ident_node2(ASSIGN_AST, $1, $3, NULL); } 
 | IDENT L_BRACKET NUMBER R_BRACKET ASSIGN expression {$$ = build_array_num_node2(ASSIGN_ARRAY_NUM_AST,$1,$3,$6);}
 | IDENT L_BRACKET IDENT R_BRACKET ASSIGN expression {$$ = build_array_ident_node2(ASSIGN_ARRAY_IDENT_AST,$1,$3,$6);}
+;
+
+increment_stmt : INCREMENT IDENT SEMIC {$$=build_ident_node(INCREMENT_AST, $2);}
+| IDENT INCREMENT SEMIC {$$=build_ident_node(INCREMENT_AST, $1);}
 ;
 
 expression : expression PLUS term {$$ = build_node2(PLUS_AST,$1,$3);}
@@ -87,6 +93,9 @@ loop_stmt : WHILE LPAR condition RPAR L_BRACE statements R_BRACE {$$ = build_nod
 cond_stmt : IF LPAR condition RPAR L_BRACE statements R_BRACE {$$ = build_node2(IF_AST,$3,$6);}
 | IF LPAR condition RPAR L_BRACE statements R_BRACE ELSE L_BRACE statements R_BRACE {$$ = build_node3(IFELSE_AST,$3,$10,$6);}
 | IF LPAR condition RPAR L_BRACE statements R_BRACE ELSE cond_stmt {$$ = build_node3(IFELSE_AST,$3,$9,$6);}
+;
+
+for_stmt : FOR LPAR assignment_stmt SEMIC condition SEMIC statement RPAR L_BRACE statements R_BRACE
 ;
 
 condition : expression EQUAL expression {$$ = build_node2(EQUAL_AST,$1,$3);}

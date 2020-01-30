@@ -68,8 +68,10 @@ extern int yydebug;
     R_BRACKET = 278,
     L_BRACE = 279,
     R_BRACE = 280,
-    IDENT = 281,
-    NUMBER = 282
+    INCREMENT = 281,
+    FOR = 282,
+    IDENT = 283,
+    NUMBER = 284
   };
 #endif
 
@@ -85,7 +87,7 @@ union YYSTYPE
     char* sp;
  
 
-#line 89 "basic.tab.h" /* yacc.c:1909  */
+#line 91 "basic.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

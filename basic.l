@@ -8,21 +8,21 @@
 "define"       { return DEFINE;}
 "array"        { return ARRAY; }
 "while"        { return WHILE; }
+"for"          { return FOR; }
 "if"           { return IF; }
 "else"         { return ELSE; }
-"return"     { break;}
 ";"            { return SEMIC; }
-
+"++"           { return INCREMENT;}
 "+"            { return PLUS; }
 "*"            { return TIMES; }
 "-"            { return MINUS; }
 "/"            { return DEVIDE; }
 "="            { return ASSIGN; }
-"=="            { return EQUAL; }
+"=="           { return EQUAL; }
 "<"            { return LT; }
-"<="            { return LTE; }
+"<="           { return LTE; }
 ">"            { return RT; }
-">="            { return RTE; }
+">="           { return RTE; }
 "%"            { return REM; }
 
 "("            { return LPAR; }
@@ -34,5 +34,5 @@
 
 [0-9]+         { yylval.ival = atoi(yytext); return NUMBER; }
 [a-zA-Z][0-9a-zA-Z]*     { yylval.sp = strdup(yytext); return IDENT; }
-[\t ] ; /* ignore whitespace */
+[\t\n ] ; /* ignore whitespace */
 %%
