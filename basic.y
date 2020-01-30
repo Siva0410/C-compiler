@@ -41,7 +41,7 @@ statements : statement statements {$$ = build_node2(STMTS_AST,$1,$2);}
 ;
 
 statement : assignment_stmt SEMIC {$$ = build_node(STMT_AST,$1);}
-| increment_stmt {$$ = build_node(STMT_AST,$1);}
+| increment_stmt SEMIC{$$ = build_node(STMT_AST,$1);}
 | loop_stmt {$$ = build_node(STMT_AST,$1);}
 | cond_stmt {$$ = build_node(STMT_AST,$1);}
 | for_stmt {$$ = build_node(STMT_AST,$1);}
@@ -52,8 +52,8 @@ assignment_stmt : IDENT ASSIGN expression {$$=build_ident_node2(ASSIGN_AST, $1, 
 | IDENT L_BRACKET IDENT R_BRACKET ASSIGN expression {$$ = build_array_ident_node2(ASSIGN_ARRAY_IDENT_AST,$1,$3,$6);}
 ;
 
-increment_stmt : INCREMENT IDENT SEMIC {$$=build_ident_node(INCREMENT_AST, $2);}
-| IDENT INCREMENT SEMIC {$$=build_ident_node(INCREMENT_AST, $1);}
+increment_stmt : INCREMENT IDENT {$$=build_ident_node(INCREMENT_AST, $2);}
+| IDENT INCREMENT {$$=build_ident_node(INCREMENT_AST, $1);}
 ;
 
 expression : expression PLUS term {$$ = build_node2(PLUS_AST,$1,$3);}
@@ -95,7 +95,8 @@ cond_stmt : IF LPAR condition RPAR L_BRACE statements R_BRACE {$$ = build_node2(
 | IF LPAR condition RPAR L_BRACE statements R_BRACE ELSE cond_stmt {$$ = build_node3(IFELSE_AST,$3,$9,$6);}
 ;
 
-for_stmt : FOR LPAR assignment_stmt SEMIC condition SEMIC statement RPAR L_BRACE statements R_BRACE
+for_stmt : FOR LPAR assignment_stmt SEMIC condition SEMIC assignment_stmt RPAR L_BRACE statements R_BRACE {$$ = build_node4(FOR_AST,$3,$5,$7,$10);}
+| FOR LPAR assignment_stmt SEMIC condition SEMIC increment_stmt RPAR L_BRACE statements R_BRACE {$$ = build_node4(FOR_AST,$3,$5,$7,$10);}
 ;
 
 condition : expression EQUAL expression {$$ = build_node2(EQUAL_AST,$1,$3);}

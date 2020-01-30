@@ -12,6 +12,8 @@ int if_else_rec = 0;
 int eq_num = 0;
 int leq_num = 0;
 int req_num = 0;
+int for_num = 0;
+int for_rec = 0;
 
 Node* build_node(NType t, Node* p1){
     Node *p;
@@ -461,15 +463,17 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             break; 
             
         case FOR_AST:
-            fprintf(text_fp,"L%d_%d:\n",loop_rec,loop_num);
             printTree(p->child,text_fp,data_fp);
-            fprintf(text_fp,"\tbeq  $v0, $zero, L%d_%d\n",loop_rec,loop_num+1);
-            loop_rec++;
-            printTree(p->child->brother,text_fp,data_fp);  
-            loop_rec--;
-            fprintf(text_fp,"\tj  L%d_%d\n",loop_rec,loop_num);
-            fprintf(text_fp,"L%d_%d:\n",loop_rec,loop_num+1);
-            if(loop_rec==0) loop_num=loop_num+2;
+            fprintf(text_fp,"F%d_%d:\n",for_rec,for_num);
+            printTree(p->child->brother,text_fp,data_fp);
+            fprintf(text_fp,"\tbeq  $v0, $zero, F%d_%d\n",for_rec,for_num+1);
+            for_rec++;
+            printTree(p->child->brother->brother->brother,text_fp,data_fp);  
+            for_rec--;
+            printTree(p->child->brother->brother,text_fp,data_fp);
+            fprintf(text_fp,"\tj  F%d_%d\n",for_rec,for_num);
+            fprintf(text_fp,"F%d_%d:\n",for_rec,for_num+1);
+            if(for_rec==0) for_num=for_num+2;
             break;
 
         case EQUAL_AST:
