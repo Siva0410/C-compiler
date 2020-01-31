@@ -76,16 +76,6 @@ factor : var {$$ = build_node(FACTOR_AST,$1);}
 | LPAR expression RPAR {$$ = build_node(FACTOR_AST,$2);}
 ;
 
-/*add_op : PLUS {$$ = build_node(PLUS_AST,$1);}
-| MINUS {$$ = build_node(MINUS_AST,$1);}
-;
-
-mul_op : TIMES {$$ = build_node(TIMES_AST,$1);}
-| DEVIDE {$$ = build_node(DEVIDE_AST,$1);}
-;
-
-rem_op : REM;
-*/
 var : IDENT {$$ = build_ident_node(IDENT_AST,$1);}
 | NUMBER {$$ = build_num_node(NUM_AST,$1);}
 | IDENT L_BRACKET NUMBER R_BRACKET {$$ = build_array_num_node(ARRAY_NUM_AST,$1,$3);}
@@ -103,7 +93,7 @@ cond_stmt : IF LPAR condition RPAR L_BRACE statements R_BRACE {$$ = build_node2(
 ;
 
 for_stmt : FOR LPAR assignment_stmt SEMIC condition SEMIC assignment_stmt RPAR L_BRACE statements R_BRACE {$$ = build_node4(FOR_AST,$3,$5,$7,$10);}
-| FOR LPAR assignment_stmt SEMIC condition SEMIC increment_stmt RPAR L_BRACE statements R_BRACE {$$ = build_node4(FOR_AST,$3,$5,$7,$10);}
+| FOR LPAR assignment_stmt SEMIC condition SEMIC increment_stmt RPAR L_BRACE statements R_BRACE {$$ = build_node4(FOR_AST,$5,$7,$10,$3);}
 ;
 
 condition : expression EQUAL expression {$$ = build_node2(EQUAL_AST,$1,$3);}
@@ -112,12 +102,6 @@ condition : expression EQUAL expression {$$ = build_node2(EQUAL_AST,$1,$3);}
 | expression LTE expression {$$ = build_node2(LTE_AST,$1,$3);}
 | expression RTE expression {$$ = build_node2(RTE_AST,$1,$3);}
 ;
-
-/*
-cond_op : EQUAL 
-| LT 
-| RT;
-*/
 
 %% 
 

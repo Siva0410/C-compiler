@@ -1568,7 +1568,7 @@ yyreduce:
 
   case 43:
 #line 106 "basic.y" /* yacc.c:1646  */
-    {(yyval.np) = build_node4(FOR_AST,(yyvsp[-8].np),(yyvsp[-6].np),(yyvsp[-4].np),(yyvsp[-1].np));}
+    {(yyval.np) = build_node4(FOR_AST,(yyvsp[-6].np),(yyvsp[-4].np),(yyvsp[-1].np),(yyvsp[-8].np));}
 #line 1573 "basic.tab.c" /* yacc.c:1646  */
     break;
 

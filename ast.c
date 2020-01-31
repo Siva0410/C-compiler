@@ -207,7 +207,7 @@ Node* build_array_ident_node(NType t, char* str, char* ident){
         yyerror("out of memory");
     }
 
-    p->ident = (char*)malloc(sizeof(char)*strlen(str));
+    p->ident = (char*)malloc(sizeof(char)*strlen(ident));
     if(p->ident == NULL){
         yyerror("out of memory");
     }
@@ -231,19 +231,19 @@ Node* build_warray_ident_node(NType t, char* str, char* ident1, char* ident2){
         yyerror("out of memory");
     }
 
-    p->ident = (char*)malloc(sizeof(char)*strlen(str));
+    p->ident = (char*)malloc(sizeof(char)*strlen(ident1));
     if(p->ident == NULL){
         yyerror("out of memory");
     }
 
-    p->ident2 = (char*)malloc(sizeof(char)*strlen(str));
+    p->ident2 = (char*)malloc(sizeof(char)*strlen(ident2));
     if(p->ident == NULL){
         yyerror("out of memory");
     }
 
     strcpy(p->variable, str);
     strcpy(p->ident, ident1);
-    strcpy(p->ident, ident2);
+    strcpy(p->ident2, ident2);
 
     p->child = NULL;
     p->brother = NULL;
@@ -261,7 +261,7 @@ Node* build_array_ident_node2(NType t, char* str, char* ident,  Node* p1){
         yyerror("out of memory");
     }
 
-    p->ident = (char*)malloc(sizeof(char)*strlen(str));
+    p->ident = (char*)malloc(sizeof(char)*strlen(ident));
     if(p->ident == NULL){
         yyerror("out of memory");
     }
@@ -285,12 +285,12 @@ Node* build_warray_ident_node2(NType t, char* str, char* ident1, char* ident2, N
         yyerror("out of memory");
     }
 
-    p->ident = (char*)malloc(sizeof(char)*strlen(str));
+    p->ident = (char*)malloc(sizeof(char)*strlen(ident1));
     if(p->ident == NULL){
         yyerror("out of memory");
     }
 
-    p->ident2 = (char*)malloc(sizeof(char)*strlen(str));
+    p->ident2 = (char*)malloc(sizeof(char)*strlen(ident2));
     if(p->ident == NULL){
         yyerror("out of memory");
     }
@@ -386,13 +386,7 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             strcpy(simTable[sim_cnt].name,p->variable);
             simTable[sim_cnt].wide = p->value;
             simTable[sim_cnt++].height = p->value2;
-            for(i=0; i<p->value;i++){
-                fprintf(data_fp,"\t.word ");
-                for(j=0; j<p->value2;j++){
-                    fprintf(data_fp,"\t0x00000000");
-                }
-                fprintf(data_fp,"\n");
-            }
+            fprintf(data_fp,"\t.space  %d\n",p->value*p->value2*4);
             switchNode(p,text_fp,data_fp);
             break;    
 
@@ -419,28 +413,29 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
             stack_num++;
             break;
-
+            
         case WARRAY_IDENT_AST:
-	    sim_num=0;
+            sim_num=0;
             for(i=0; strcmp(simTable[i].name, p->variable)!= 0;i++){sim_num = i;}
             fprintf(text_fp,"\tli  $t0, %s\n",p->variable);
+            fprintf(text_fp,"\tli  $t1, %s\n",p->ident2);
+            fprintf(text_fp,"\tlw  $t2, 0($t1)\n");
             fprintf(text_fp,"\tli  $t1, %s\n",p->ident);
-	    fprintf(text_fp,"\tlw  $t2, 0($t1)\n");
-	    fprintf(text_fp,"\tli  $t1, %s\n",p->ident2);
-	    fprintf(text_fp,"\tlw  $t3, 0($t1)\n");
-            fprintf(text_fp,"\tmulti  $t3, %d\n",simTable[sim_num].wide);
-	    fprintf(text_fp,"\tmflo  $t2\n\tnop\n");
-	    fprintf(text_fp,"\tadd  $t2, $t2, $t3\n");	
+            fprintf(text_fp,"\tlw  $t3, 0($t1)\n");
+            fprintf(text_fp,"\tli  $t4, %d\n",simTable[sim_num].wide);
+            fprintf(text_fp,"\tmult  $t3, $t4\n");
+            fprintf(text_fp,"\tmflo  $t3\n\tnop\n");
+            fprintf(text_fp,"\tadd  $t2, $t2, $t3\n");	
             fprintf(text_fp,"\tsll  $t2, $t2, 2\n");
             fprintf(text_fp,"\tadd  $t0, $t0, $t2\n\tlw  $v0, 0($t0)\n\tnop\n");
             fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
             stack_num++;
             break;
-
+            
         case STMTS_AST:
             switchNode(p,text_fp,data_fp);
             break;  
-
+            
         case STMT_AST:
             switchNode(p,text_fp,data_fp);
             break;
@@ -461,10 +456,10 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
 
         case ASSIGN_WARRAY_NUM_AST:
             switchNode(p,text_fp,data_fp);
-	    sim_num = 0;
+            sim_num = 0;
             for(i=0; !strcmp(simTable[i].name, p->variable) != 0; i++){sim_num = i;}
             fprintf(text_fp,"\tli   $t0, %s\n",p->variable);
-            fprintf(text_fp,"\tsw   $v0, %d($t0)\n",p->value2*simTable[sim_num].wide*4 + p->value*4);
+            fprintf(text_fp,"\tsw   $v0, %d($t0)\n",p->value*simTable[sim_num].wide*4 + p->value2*4);
             stack_num = 0;
             break;  
 
@@ -482,13 +477,14 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             sim_num=0;
             for(i=0; strcmp(simTable[i].name, p->variable)!= 0;i++){sim_num = i;}
             fprintf(text_fp,"\tli  $t0, %s\n",p->variable);
+            fprintf(text_fp,"\tli  $t1, %s\n",p->ident2);
+            fprintf(text_fp,"\tlw  $t2, 0($t1)\n");
             fprintf(text_fp,"\tli  $t1, %s\n",p->ident);
-	    fprintf(text_fp,"\tlw  $t2, 0($t1)\n");
-	    fprintf(text_fp,"\tli  $t1, %s\n",p->ident2);
-	    fprintf(text_fp,"\tlw  $t3, 0($t1)\n");
-            fprintf(text_fp,"\tmulti  $t3, %d\n",simTable[sim_num].wide);
-	    fprintf(text_fp,"\tmflo  $t2\n\tnop\n");
-	    fprintf(text_fp,"\tadd  $t2, $t2, $t3\n");
+            fprintf(text_fp,"\tlw  $t3, 0($t1)\n");
+            fprintf(text_fp,"\tli  $t4, %d\n",simTable[sim_num].wide);
+            fprintf(text_fp,"\tmult  $t3, $t4\n");
+            fprintf(text_fp,"\tmflo  $t3\n\tnop\n");
+            fprintf(text_fp,"\tadd  $t2, $t2, $t3\n");
             fprintf(text_fp,"\tsll  $t2, $t2, 2\n\tnop\n");
             fprintf(text_fp,"\tadd  $t0, $t0, $t2\n\tnop\n\tsw  $v0, 0($t0)\n\tnop\n");
             stack_num = 0;
@@ -499,7 +495,7 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             break; 
 
         case PLUS_AST:
-	    switchNode(p,text_fp,data_fp);
+            switchNode(p,text_fp,data_fp);
             fprintf(text_fp,"\tlw  $t0, %d($sp)\n",(stack_num-2)*4);
             fprintf(text_fp,"\tlw  $t1, %d($sp)\n\tnop\n",(stack_num-1)*4);
             fprintf(text_fp,"\tadd  $v0, $t0, $t1\n\tnop\n");
@@ -510,6 +506,12 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
 
         case MINUS_AST:
             switchNode(p,text_fp,data_fp);
+            fprintf(text_fp,"\tlw  $t0, %d($sp)\n",(stack_num-2)*4);
+            fprintf(text_fp,"\tlw  $t1, %d($sp)\n\tnop\n",(stack_num-1)*4);
+            fprintf(text_fp,"\tsub  $v0, $t0, $t1\n\tnop\n");
+            stack_num=stack_num-2;
+            fprintf(text_fp,"\tsw  $v0, %d($sp)\n",stack_num*4);
+            stack_num++;
             break;    
 
         case REM_AST:
@@ -606,14 +608,16 @@ void printTree(Node* p,FILE *text_fp,FILE *data_fp){
             break; 
             
         case FOR_AST:
-            printTree(p->child,text_fp,data_fp);
+            printTree(p->child->brother->brother->brother,text_fp,data_fp);
+            p->child->brother->brother->brother = NULL;
             fprintf(text_fp,"F%d_%d:\n",for_rec,for_num);
-            printTree(p->child->brother,text_fp,data_fp);
+            printTree(p->child,text_fp,data_fp);
             fprintf(text_fp,"\tbeq  $v0, $zero, F%d_%d\n",for_rec,for_num+1);
             for_rec++;
-            printTree(p->child->brother->brother->brother,text_fp,data_fp);  
+            printTree(p->child->brother->brother,text_fp,data_fp); 
             for_rec--;
-            printTree(p->child->brother->brother,text_fp,data_fp);
+            p->child->brother->brother = NULL;
+            printTree(p->child->brother,text_fp,data_fp);
             fprintf(text_fp,"\tj  F%d_%d\n",for_rec,for_num);
             fprintf(text_fp,"F%d_%d:\n",for_rec,for_num+1);
             if(for_rec==0) for_num=for_num+2;
